@@ -4,35 +4,60 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import web.model.Car;
-import web.service.CarService;
-import web.service.CarServiceImpl;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import web.model.User;
+import web.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class HelloController {
 
-	@GetMapping(value = "/")
-	public String printWelcome(ModelMap model) {
-		List<String> messages = new ArrayList<>();
-		messages.add("Hello!");
-		messages.add("I'm Spring MVC application");
-		messages.add("5.2.0 version by sep'19 ");
-		model.addAttribute("messages", messages);
-		return "index";
+	private UserService userService;
+
+	public HelloController(web.service.UserService userService) {
+		this.userService = userService;
 	}
 
-	private final CarService carService = new CarServiceImpl();
-
-	//http://localhost:8088/spring_mvc_war_exploded/cars?count=2
-	@GetMapping(value = "/cars")
-	public String showCars(@RequestParam(value = "count", required = false) Integer count, Model model) {
-		List<Car> cars = carService.getCars(count);
-		model.addAttribute("cars", cars);
-		return "cars";
+    @GetMapping(value = "/")
+	public String printUsersList(ModelMap model) {
+		List<User> userList = userService.listUsers();
+		model.addAttribute("allUsers", userList);
+		return "users";
 	}
-	
+
+	@GetMapping("/add")
+	public String showAddUserForm(Model model) {
+		model.addAttribute("user", new User());  // Пустой объект User для формы
+		return "user-form";  // Страница с формой добавления
+	}
+
+	@PostMapping("/add")
+	public String addUser(@ModelAttribute User user) {
+		userService.addUser(user);  // Сохраняем пользователя
+		return "redirect:/";  // Перенаправляем на страницу со списком пользователей
+	}
+
+	@GetMapping("/edit/{id}")
+	public String showEditUserForm(@PathVariable("id") int id, Model model) {
+		User user = userService.getUser(id);  // Получаем пользователя по ID
+		model.addAttribute("user", user);
+		return "user-form";  // Страница с формой редактирования
+	}
+
+	@PostMapping("/edit/{id}")
+	public String updateUser(@PathVariable("id") int id, @ModelAttribute User user) {
+		user.setId(id);  // Устанавливаем ID пользователя для обновления
+		userService.addUser(user);  // Сохраняем обновлённого пользователя
+		return "redirect:/";  // Перенаправляем на страницу со списком пользователей
+	}
+
+	@GetMapping("/delete/{id}")
+	public String deleteUser(@PathVariable("id") int id) {
+		userService.deleteUser(id);  // Удаляем пользователя
+		return "redirect:/";  // Перенаправляем на страницу со списком пользователей
+	}
+
 }
