@@ -22,7 +22,7 @@
 </form>
 
 <!-- Форма для редактирования пользователя -->
-<form th:action="@{/edit/{id}(id=${user.id})}" method="post" th:if="${user.id != null}">
+<form th:action="@{/edit(id=${user.id})}" method="post" th:if="${user.id != null}">
     <label for="nameEdit">Name:</label>
     <input type="text" id="nameEdit" name="name" th:value="${user.name}" required />
     <br>
